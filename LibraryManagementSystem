@@ -1,74 +1,203 @@
 import java.util.*;
 
-// Book class
+// Book class with enhanced functionality
 class Book {
+    private static int nextBookId = 1;
+    private int bookId;
     private String title;
     private String author;
     private String genre;
     private String isbn;
     private boolean isAvailable;
+    private int categoryId;
+    private int publisherId;
 
-    public Book(String title, String author, String genre, String isbn) {
+    public Book(String title, String author, String genre, String isbn, int categoryId, int publisherId) {
+        this.bookId = nextBookId++;
         this.title = title;
         this.author = author;
         this.genre = genre;
         this.isbn = isbn;
         this.isAvailable = true;
+        this.categoryId = categoryId;
+        this.publisherId = publisherId;
     }
 
     // Getters and Setters
+    public int getBookId() { return bookId; }
     public String getTitle() { return title; }
     public String getAuthor() { return author; }
     public String getGenre() { return genre; }
     public String getIsbn() { return isbn; }
     public boolean isAvailable() { return isAvailable; }
+    public int getCategoryId() { return categoryId; }
+    public int getPublisherId() { return publisherId; }
     public void setAvailable(boolean available) { isAvailable = available; }
 
     @Override
     public String toString() {
-        return "Title: " + title + ", Author: " + author + ", Genre: " + genre +
-                ", ISBN: " + isbn + ", Available: " + (isAvailable ? "Yes" : "No");
+        return "ID: " + bookId + ", Title: " + title + ", Author: " + author + 
+               ", Genre: " + genre + ", ISBN: " + isbn + ", Available: " + 
+               (isAvailable ? "Yes" : "No") + ", Category ID: " + categoryId + 
+               ", Publisher ID: " + publisherId;
+    }
+
+    // Static method to find book by ISBN
+    public static Book findByIsbn(List<Book> books, String isbn) {
+        return books.stream()
+                   .filter(book -> book.getIsbn().equals(isbn))
+                   .findFirst()
+                   .orElse(null);
+    }
+
+    // Static method to find book by ID
+    public static Book findById(List<Book> books, int bookId) {
+        return books.stream()
+                   .filter(book -> book.getBookId() == bookId)
+                   .findFirst()
+                   .orElse(null);
     }
 }
 
-// Publisher class
+// Publisher class with CRUD operations
 class Publisher {
+    private static int nextPublisherId = 1;
+    private int publisherId;
     private String name;
     private String address;
     private String contact;
 
     public Publisher(String name, String address, String contact) {
+        this.publisherId = nextPublisherId++;
         this.name = name;
         this.address = address;
         this.contact = contact;
     }
 
+    // Getters
+    public int getPublisherId() { return publisherId; }
     public String getName() { return name; }
     public String getAddress() { return address; }
     public String getContact() { return contact; }
 
     @Override
     public String toString() {
-        return "Publisher: " + name + ", Address: " + address + ", Contact: " + contact;
+        return "ID: " + publisherId + ", Publisher: " + name + 
+               ", Address: " + address + ", Contact: " + contact;
+    }
+
+    // CRUD Operations for Publisher
+    public static void addPublisher(List<Publisher> publishers, Scanner scanner) {
+        System.out.print("Enter publisher name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter publisher address: ");
+        String address = scanner.nextLine();
+        System.out.print("Enter contact info: ");
+        String contact = scanner.nextLine();
+
+        publishers.add(new Publisher(name, address, contact));
+        System.out.println("Publisher added successfully with ID: " + (nextPublisherId - 1));
+    }
+
+    public static void viewAllPublishers(List<Publisher> publishers) {
+        System.out.println("\n--- All Publishers ---");
+        if (publishers.isEmpty()) {
+            System.out.println("No publishers registered.");
+        } else {
+            publishers.forEach(System.out::println);
+        }
+    }
+
+    public static Publisher findById(List<Publisher> publishers, int publisherId) {
+        return publishers.stream()
+                        .filter(publisher -> publisher.getPublisherId() == publisherId)
+                        .findFirst()
+                        .orElse(null);
+    }
+
+    public static void removePublisher(List<Publisher> publishers, Scanner scanner) {
+        viewAllPublishers(publishers);
+        if (publishers.isEmpty()) return;
+
+        System.out.print("Enter publisher ID to remove: ");
+        int publisherId = scanner.nextInt();
+        scanner.nextLine();
+
+        Publisher publisher = findById(publishers, publisherId);
+        if (publisher != null) {
+            publishers.remove(publisher);
+            System.out.println("Publisher removed successfully!");
+        } else {
+            System.out.println("Publisher with ID " + publisherId + " not found.");
+        }
     }
 }
 
-// Category class for book genres
+// Category class with CRUD operations
 class Category {
+    private static int nextCategoryId = 1;
+    private int categoryId;
     private String categoryName;
     private String description;
 
     public Category(String categoryName, String description) {
+        this.categoryId = nextCategoryId++;
         this.categoryName = categoryName;
         this.description = description;
     }
 
+    // Getters
+    public int getCategoryId() { return categoryId; }
     public String getCategoryName() { return categoryName; }
     public String getDescription() { return description; }
 
     @Override
     public String toString() {
-        return "Category: " + categoryName + " - " + description;
+        return "ID: " + categoryId + ", Category: " + categoryName + " - " + description;
+    }
+
+    // CRUD Operations for Category
+    public static void addCategory(List<Category> categories, Scanner scanner) {
+        System.out.print("Enter category name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter category description: ");
+        String description = scanner.nextLine();
+
+        categories.add(new Category(name, description));
+        System.out.println("Category added successfully with ID: " + (nextCategoryId - 1));
+    }
+
+    public static void viewAllCategories(List<Category> categories) {
+        System.out.println("\n--- All Categories ---");
+        if (categories.isEmpty()) {
+            System.out.println("No categories available.");
+        } else {
+            categories.forEach(System.out::println);
+        }
+    }
+
+    public static Category findById(List<Category> categories, int categoryId) {
+        return categories.stream()
+                        .filter(category -> category.getCategoryId() == categoryId)
+                        .findFirst()
+                        .orElse(null);
+    }
+
+    public static void removeCategory(List<Category> categories, Scanner scanner) {
+        viewAllCategories(categories);
+        if (categories.isEmpty()) return;
+
+        System.out.print("Enter category ID to remove: ");
+        int categoryId = scanner.nextInt();
+        scanner.nextLine();
+
+        Category category = findById(categories, categoryId);
+        if (category != null) {
+            categories.remove(category);
+            System.out.println("Category removed successfully!");
+        } else {
+            System.out.println("Category with ID " + categoryId + " not found.");
+        }
     }
 }
 
@@ -101,7 +230,7 @@ class LibraryStats {
 }
 
 // Main Library Management System class - Admin Only
-public class LibraryManagementSystem {
+public class EnhancedLibraryManagementSystem {
     private static Scanner scanner = new Scanner(System.in);
     private static List<Book> books = new ArrayList<>();
     private static List<Publisher> publishers = new ArrayList<>();
@@ -112,19 +241,25 @@ public class LibraryManagementSystem {
     private static final String ADMIN_PASSWORD = "password";
 
     public static void main(String[] args) {
-        initializeData();
+        try {
+            initializeData();
 
-        System.out.println("=== Library Management System (Admin Only) ===");
+            System.out.println("=== Enhanced Library Management System (Admin Only) ===");
 
-        while (true) {
-            if (adminLogin()) {
-                adminMenu();
-            } else {
-                System.out.println("Exiting system...");
-                break;
+            while (true) {
+                if (adminLogin()) {
+                    adminMenu();
+                } else {
+                    System.out.println("Exiting system...");
+                    break;
+                }
+            }
+        } finally {
+            // Close scanner - Best practice
+            if (scanner != null) {
+                scanner.close();
             }
         }
-        scanner.close();
     }
 
     private static void initializeData() {
@@ -138,17 +273,18 @@ public class LibraryManagementSystem {
         publishers.add(new Publisher("Tech Publications", "123 Tech Street", "tech@pub.com"));
         publishers.add(new Publisher("Science Press", "456 Science Ave", "info@scipress.com"));
 
-        // Initialize books
-        books.add(new Book("Ancient Civilizations", "Balgurusaami", "History", "978-1-234567-89-0"));
-        books.add(new Book("Java Programming", "Balgurusaami", "Technology", "978-1-234567-90-6"));
-        books.add(new Book("Data Structures", "John Smith", "Technology", "978-1-234567-91-3"));
+        // Initialize books with proper relationships
+        books.add(new Book("Ancient Civilizations", "Balgurusaami", "History", "978-1-234567-89-0", 4, 2));
+        books.add(new Book("Java Programming", "Balgurusaami", "Technology", "978-1-234567-90-6", 2, 1));
+        books.add(new Book("Data Structures", "John Smith", "Technology", "978-1-234567-91-3", 2, 1));
     }
 
     private static boolean adminLogin() {
-        System.out.print("\nEnter admin username (or 'exit' to quit): ");
+        System.out.print("\nEnter admin username (or 'Q'/'q' to quit): ");
         String username = scanner.nextLine();
 
-        if (username.equalsIgnoreCase("exit")) {
+        // Enhanced quit option - single character
+        if (username.equalsIgnoreCase("q")) {
             return false;
         }
 
@@ -172,23 +308,30 @@ public class LibraryManagementSystem {
             System.out.println("3. Manage Categories");
             System.out.println("4. View Library Statistics");
             System.out.println("5. Search Books");
-            System.out.println("6. Logout");
+            System.out.println("6. View Relationships");
+            System.out.println("Q. Logout");
             System.out.print("Choose an option: ");
 
-            int option = scanner.nextInt();
-            scanner.nextLine(); // clear newline
+            String input = scanner.nextLine();
+            
+            if (input.equalsIgnoreCase("q")) {
+                System.out.println("Admin logged out.");
+                return;
+            }
 
-            switch (option) {
-                case 1: bookManagementMenu(); break;
-                case 2: publisherManagementMenu(); break;
-                case 3: categoryManagementMenu(); break;
-                case 4: viewStatistics(); break;
-                case 5: searchBooks(); break;
-                case 6:
-                    System.out.println("Admin logged out.");
-                    return;
-                default:
-                    System.out.println("Invalid option. Please try again.");
+            try {
+                int option = Integer.parseInt(input);
+                switch (option) {
+                    case 1: bookManagementMenu(); break;
+                    case 2: publisherManagementMenu(); break;
+                    case 3: categoryManagementMenu(); break;
+                    case 4: viewStatistics(); break;
+                    case 5: searchBooks(); break;
+                    case 6: viewRelationships(); break;
+                    default: System.out.println("Invalid option. Please try again.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number or 'Q' to quit.");
             }
         }
     }
@@ -198,21 +341,30 @@ public class LibraryManagementSystem {
             System.out.println("\n--- Book Management ---");
             System.out.println("1. Add Book");
             System.out.println("2. View All Books");
-            System.out.println("3. Remove Book");
-            System.out.println("4. Update Book Status");
-            System.out.println("5. Back to Main Menu");
+            System.out.println("3. Remove Book (by ISBN)");
+            System.out.println("4. Remove Book (by Book ID)");
+            System.out.println("5. Update Book Status (by ISBN)");
+            System.out.println("6. Update Book Status (by Book ID)");
+            System.out.println("Q. Back to Main Menu");
             System.out.print("Choose an option: ");
 
-            int option = scanner.nextInt();
-            scanner.nextLine();
+            String input = scanner.nextLine();
+            
+            if (input.equalsIgnoreCase("q")) return;
 
-            switch (option) {
-                case 1: addBook(); break;
-                case 2: viewAllBooks(); break;
-                case 3: removeBook(); break;
-                case 4: updateBookStatus(); break;
-                case 5: return;
-                default: System.out.println("Invalid option.");
+            try {
+                int option = Integer.parseInt(input);
+                switch (option) {
+                    case 1: addBook(); break;
+                    case 2: viewAllBooks(); break;
+                    case 3: removeBookByIsbn(); break;
+                    case 4: removeBookById(); break;
+                    case 5: updateBookStatusByIsbn(); break;
+                    case 6: updateBookStatusById(); break;
+                    default: System.out.println("Invalid option.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number or 'Q' to quit.");
             }
         }
     }
@@ -227,8 +379,31 @@ public class LibraryManagementSystem {
         System.out.print("Enter ISBN: ");
         String isbn = scanner.nextLine();
 
-        books.add(new Book(title, author, genre, isbn));
-        System.out.println("Book added successfully!");
+        // Show available categories
+        Category.viewAllCategories(categories);
+        System.out.print("Enter category ID: ");
+        int categoryId = scanner.nextInt();
+        scanner.nextLine();
+
+        // Show available publishers
+        Publisher.viewAllPublishers(publishers);
+        System.out.print("Enter publisher ID: ");
+        int publisherId = scanner.nextInt();
+        scanner.nextLine();
+
+        // Validate category and publisher exist
+        if (Category.findById(categories, categoryId) == null) {
+            System.out.println("Invalid category ID!");
+            return;
+        }
+        if (Publisher.findById(publishers, publisherId) == null) {
+            System.out.println("Invalid publisher ID!");
+            return;
+        }
+
+        Book newBook = new Book(title, author, genre, isbn, categoryId, publisherId);
+        books.add(newBook);
+        System.out.println("Book added successfully with ID: " + newBook.getBookId());
     }
 
     private static void viewAllBooks() {
@@ -236,42 +411,61 @@ public class LibraryManagementSystem {
         if (books.isEmpty()) {
             System.out.println("No books in the library.");
         } else {
-            for (int i = 0; i < books.size(); i++) {
-                System.out.println((i + 1) + ". " + books.get(i));
-            }
+            books.forEach(System.out::println);
         }
     }
 
-    private static void removeBook() {
-        viewAllBooks();
-        if (books.isEmpty()) return;
+    private static void removeBookByIsbn() {
+        System.out.print("Enter ISBN of book to remove: ");
+        String isbn = scanner.nextLine();
 
-        System.out.print("Enter book number to remove: ");
-        int bookNum = scanner.nextInt();
-        scanner.nextLine();
-
-        if (bookNum > 0 && bookNum <= books.size()) {
-            books.remove(bookNum - 1);
+        Book book = Book.findByIsbn(books, isbn);
+        if (book != null) {
+            books.remove(book);
             System.out.println("Book removed successfully!");
         } else {
-            System.out.println("Invalid book number.");
+            System.out.println("Book with ISBN " + isbn + " not found.");
         }
     }
 
-    private static void updateBookStatus() {
-        viewAllBooks();
-        if (books.isEmpty()) return;
-
-        System.out.print("Enter book number to update status: ");
-        int bookNum = scanner.nextInt();
+    private static void removeBookById() {
+        System.out.print("Enter Book ID to remove: ");
+        int bookId = scanner.nextInt();
         scanner.nextLine();
 
-        if (bookNum > 0 && bookNum <= books.size()) {
-            Book book = books.get(bookNum - 1);
+        Book book = Book.findById(books, bookId);
+        if (book != null) {
+            books.remove(book);
+            System.out.println("Book removed successfully!");
+        } else {
+            System.out.println("Book with ID " + bookId + " not found.");
+        }
+    }
+
+    private static void updateBookStatusByIsbn() {
+        System.out.print("Enter ISBN of book to update status: ");
+        String isbn = scanner.nextLine();
+
+        Book book = Book.findByIsbn(books, isbn);
+        if (book != null) {
             book.setAvailable(!book.isAvailable());
             System.out.println("Book status updated! Now " + (book.isAvailable() ? "Available" : "Not Available"));
         } else {
-            System.out.println("Invalid book number.");
+            System.out.println("Book with ISBN " + isbn + " not found.");
+        }
+    }
+
+    private static void updateBookStatusById() {
+        System.out.print("Enter Book ID to update status: ");
+        int bookId = scanner.nextInt();
+        scanner.nextLine();
+
+        Book book = Book.findById(books, bookId);
+        if (book != null) {
+            book.setAvailable(!book.isAvailable());
+            System.out.println("Book status updated! Now " + (book.isAvailable() ? "Available" : "Not Available"));
+        } else {
+            System.out.println("Book with ID " + bookId + " not found.");
         }
     }
 
@@ -280,40 +474,24 @@ public class LibraryManagementSystem {
             System.out.println("\n--- Publisher Management ---");
             System.out.println("1. Add Publisher");
             System.out.println("2. View All Publishers");
-            System.out.println("3. Back to Main Menu");
+            System.out.println("3. Remove Publisher");
+            System.out.println("Q. Back to Main Menu");
             System.out.print("Choose an option: ");
 
-            int option = scanner.nextInt();
-            scanner.nextLine();
+            String input = scanner.nextLine();
+            
+            if (input.equalsIgnoreCase("q")) return;
 
-            switch (option) {
-                case 1: addPublisher(); break;
-                case 2: viewAllPublishers(); break;
-                case 3: return;
-                default: System.out.println("Invalid option.");
-            }
-        }
-    }
-
-    private static void addPublisher() {
-        System.out.print("Enter publisher name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter publisher address: ");
-        String address = scanner.nextLine();
-        System.out.print("Enter contact info: ");
-        String contact = scanner.nextLine();
-
-        publishers.add(new Publisher(name, address, contact));
-        System.out.println("Publisher added successfully!");
-    }
-
-    private static void viewAllPublishers() {
-        System.out.println("\n--- All Publishers ---");
-        if (publishers.isEmpty()) {
-            System.out.println("No publishers registered.");
-        } else {
-            for (int i = 0; i < publishers.size(); i++) {
-                System.out.println((i + 1) + ". " + publishers.get(i));
+            try {
+                int option = Integer.parseInt(input);
+                switch (option) {
+                    case 1: Publisher.addPublisher(publishers, scanner); break;
+                    case 2: Publisher.viewAllPublishers(publishers); break;
+                    case 3: Publisher.removePublisher(publishers, scanner); break;
+                    default: System.out.println("Invalid option.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number or 'Q' to quit.");
             }
         }
     }
@@ -323,38 +501,24 @@ public class LibraryManagementSystem {
             System.out.println("\n--- Category Management ---");
             System.out.println("1. Add Category");
             System.out.println("2. View All Categories");
-            System.out.println("3. Back to Main Menu");
+            System.out.println("3. Remove Category");
+            System.out.println("Q. Back to Main Menu");
             System.out.print("Choose an option: ");
 
-            int option = scanner.nextInt();
-            scanner.nextLine();
+            String input = scanner.nextLine();
+            
+            if (input.equalsIgnoreCase("q")) return;
 
-            switch (option) {
-                case 1: addCategory(); break;
-                case 2: viewAllCategories(); break;
-                case 3: return;
-                default: System.out.println("Invalid option.");
-            }
-        }
-    }
-
-    private static void addCategory() {
-        System.out.print("Enter category name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter category description: ");
-        String description = scanner.nextLine();
-
-        categories.add(new Category(name, description));
-        System.out.println("Category added successfully!");
-    }
-
-    private static void viewAllCategories() {
-        System.out.println("\n--- All Categories ---");
-        if (categories.isEmpty()) {
-            System.out.println("No categories available.");
-        } else {
-            for (int i = 0; i < categories.size(); i++) {
-                System.out.println((i + 1) + ". " + categories.get(i));
+            try {
+                int option = Integer.parseInt(input);
+                switch (option) {
+                    case 1: Category.addCategory(categories, scanner); break;
+                    case 2: Category.viewAllCategories(categories); break;
+                    case 3: Category.removeCategory(categories, scanner); break;
+                    default: System.out.println("Invalid option.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number or 'Q' to quit.");
             }
         }
     }
@@ -365,7 +529,7 @@ public class LibraryManagementSystem {
     }
 
     private static void searchBooks() {
-        System.out.print("Enter search term (title/author/genre): ");
+        System.out.print("Enter search term (title/author/genre/isbn): ");
         String searchTerm = scanner.nextLine().toLowerCase();
 
         System.out.println("\n--- Search Results ---");
@@ -373,7 +537,8 @@ public class LibraryManagementSystem {
         for (Book book : books) {
             if (book.getTitle().toLowerCase().contains(searchTerm) ||
                     book.getAuthor().toLowerCase().contains(searchTerm) ||
-                    book.getGenre().toLowerCase().contains(searchTerm)) {
+                    book.getGenre().toLowerCase().contains(searchTerm) ||
+                    book.getIsbn().toLowerCase().contains(searchTerm)) {
                 System.out.println(book);
                 found = true;
             }
@@ -381,6 +546,24 @@ public class LibraryManagementSystem {
 
         if (!found) {
             System.out.println("No books found matching the search term.");
+        }
+    }
+
+    // New method to show relationships between books, publishers, and categories
+    private static void viewRelationships() {
+        System.out.println("\n--- Books with Publisher and Category Details ---");
+        if (books.isEmpty()) {
+            System.out.println("No books in the library.");
+            return;
+        }
+
+        for (Book book : books) {
+            Category category = Category.findById(categories, book.getCategoryId());
+            Publisher publisher = Publisher.findById(publishers, book.getPublisherId());
+            
+            System.out.println("\n" + book);
+            System.out.println("  Category: " + (category != null ? category.getCategoryName() + " - " + category.getDescription() : "Unknown"));
+            System.out.println("  Publisher: " + (publisher != null ? publisher.getName() + " (" + publisher.getContact() + ")" : "Unknown"));
         }
     }
 }
